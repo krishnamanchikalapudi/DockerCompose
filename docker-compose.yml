@@ -1,0 +1,2 @@
+include:
+  - path: ./apps/ollama.yml
