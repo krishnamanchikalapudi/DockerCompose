@@ -20,8 +20,21 @@ banner_bootcamp(){
 EOF
 }
 
+tests(){
+    ollama_tests
+}
 ollama_tests(){
-    
+    curl -s --max-time 5 http://localhost:11434/api/tags
+    printf "\n\n"
+
+    curl -s --max-time 5 -X POST http://localhost:11434/api/generate -H "Content-Type: application/json" -d '{"model":"qwen3.5:0.8b","prompt":"What vaccines does an adult cat need? Be concise.","stream":false}' | jq '.response'
+    printf "\n\n"
+
+    curl -s --max-time 5 -X POST http://localhost:11434/api/embed -H "Content-Type: application/json" -d '{"model":"nomic-embed-text","input":"feline upper respiratory infection treatment"}' | jq '.embeddings[0][0:5]'
+    printf "\n\n"
+
+    curl -s --max-time 5 -X POST http://localhost:11434/api/show -H "Content-Type: application/json" -d '{"name":"qwen3.5:0.8b"}' | jq '{model:.modelfile,size:.size}'
+    printf "\n\n"
 }
 
 # Resolve Docker Compose command (docker compose plugin vs legacy docker-compose)
@@ -67,8 +80,12 @@ case $arg in
         check_docker
         "${DOCKER_COMPOSE[@]}" -f "$COMPOSE_FILE" logs -f
         ;;
+    TEST|TESTS)
+        check_docker
+        tests
+        ;;
     *)
-        echo "Usage: $0 <START|STOP|RESTART|STATUS|LOGS>"
+        echo "Usage: $0 <START|STOP|RESTART|STATUS|LOGS|TEST>"
         exit 1
         ;;
 esac

@@ -24,16 +24,20 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
-      
+    environment:
+      - MODEL_NAMES=${MODEL_NAMES:-qwen3.5:0.8b nomic-embed-text}
     command:
       - sh
       - -c
       - |
-        echo 'Pulling qwen3.5:0.8b...'
-        curl -sf -X POST http://ollama:11434/api/pull -H 'Content-Type: application/json' -d '{"name":"qwen3.5:0.8b","stream":false}' --max-time 600
-        echo 'Pulling nomic-embed-text...'
-        curl -sf -X POST http://ollama:11434/api/pull -H 'Content-Type: application/json' -d '{"name":"nomic-embed-text","stream":false}' --max-time 300
-        echo 'Models ready.'
+        for model in $$(echo "$${MODEL_NAMES}" | tr ',' ' '); do
+          echo "Pulling $${model}..."
+          curl -sf -X POST http://ollama:11434/api/pull \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"$${model}\",\"stream\":false}" \
+            --max-time 600
+        done
+        echo "Models ready."
     restart: on-failure
 
 volumes:
