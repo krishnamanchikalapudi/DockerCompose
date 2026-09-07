@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -e
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMPOSE_FILE="${SCRIPT_DIR}/docker-compose.yml"
-
-arg="${1:-START}"
+arg="${1:-RESTART}"
 
 banner_bootcamp(){
     cat << 'EOF'
@@ -37,15 +33,6 @@ ollama_tests(){
     printf "\n\n"
 }
 
-# Resolve Docker Compose command (docker compose plugin vs legacy docker-compose)
-if docker compose version >/dev/null 2>&1; then
-    DOCKER_COMPOSE=(docker compose)
-elif command -v docker-compose >/dev/null 2>&1; then
-    DOCKER_COMPOSE=(docker-compose)
-else
-    echo "Error: Neither 'docker compose' nor 'docker-compose' is available." >&2
-    exit 1
-fi
 
 check_docker() {
     if ! docker info >/dev/null 2>&1; then
@@ -62,26 +49,23 @@ echo "User Action: ${arg}"
 case $arg in
     START|UP)
         check_docker
-        "${DOCKER_COMPOSE[@]}" -f "$COMPOSE_FILE" up -d
+        docker compose -f ./apps/ollama.yml up
         ;;
     STOP|DOWN)
         check_docker
-        "${DOCKER_COMPOSE[@]}" -f "$COMPOSE_FILE" down
+        docker compose -f ./apps/ollama.yml down
         ;;
     RESTART)
         check_docker
-        "${DOCKER_COMPOSE[@]}" -f "$COMPOSE_FILE" restart
+        docker compose -f ./apps/ollama.yml restart
         ;;
     STATUS|PS)
-        check_docker
-        "${DOCKER_COMPOSE[@]}" -f "$COMPOSE_FILE" ps
+        docker compose -f ./apps/ollama.yml ps
         ;;
     LOGS)
-        check_docker
-        "${DOCKER_COMPOSE[@]}" -f "$COMPOSE_FILE" logs -f
+        docker compose -f ./apps/ollama.yml logs
         ;;
     TEST|TESTS)
-        check_docker
         tests
         ;;
     *)
