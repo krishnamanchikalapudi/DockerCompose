@@ -1,0 +1,27 @@
+services:
+  # ── MLFlow service: http://localhost:5000 ────────────
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    user: root
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mlflow server \
+          --backend-store-uri postgresql://petclinic:petclinic@postgresql:5432/mlflow \
+          --host 0.0.0.0 \
+          --port 5000 \
+          --default-artifact-root /mlflow
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped

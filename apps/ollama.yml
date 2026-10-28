@@ -24,8 +24,8 @@ services:
     depends_on:
       ollama:
         condition: service_healthy
-    environment:
-      - MODEL_NAMES=${MODEL_NAMES:-qwen3.5:0.8b nomic-embed-text}
+    environment:  # https://ollama.com/library/qwen3.5
+      MODEL_NAMES: ${MODEL_NAMES:-qwen3.5:0.8b nomic-embed-text}
     command:
       - sh
       - -c
@@ -38,6 +38,12 @@ services:
             --max-time 600
         done
         echo "Models ready."
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://ollama:11434/api/tags >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     restart: on-failure
 
 volumes:

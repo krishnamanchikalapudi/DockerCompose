@@ -1,0 +1,27 @@
+services:
+  valkey:
+    image: valkey/valkey:latest
+    container_name: valkey-server
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      VALKEY_PASSWORD: 'My$$ecurePassw0rdHere'
+    volumes:
+      - valkey_data:/data
+    command:
+      - valkey-server
+      - --requirepass
+      - 'My$$ecurePassw0rdHere'
+      - --protected-mode
+      - 'yes'
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  valkey_data:
+    driver: local

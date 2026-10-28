@@ -1,2 +1,5 @@
 include:
   - path: ./apps/ollama.yml
+  - path: ./apps/mlflow.yml
+  - path: ./apps/pgvector.yml
+  - path: ./apps/valkey.yml
